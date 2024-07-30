@@ -1,0 +1,79 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      KUBE_CONFIG: ${{ secrets.KUBECONFIG_DEV }}
+      NAMESPACE: dev
+      DEPLOYMENT_NAME: my-app
+      IMAGE_NAME: my-docker-repo/my-image:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Kubernetes
+        run: echo "${KUBE_CONFIG}" > $HOME/.kube/config
+
+      - name: Install kubectl
+        uses: actions-hub/kubectl@v1
+
+      - name: Update Kubernetes deployment
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} ${DEPLOYMENT_NAME}=${IMAGE_NAME} -n ${NAMESPACE}
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} -n ${NAMESPACE}
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    env:
+      KUBE_CONFIG: ${{ secrets.KUBECONFIG_STAGING }}
+      NAMESPACE: staging
+      DEPLOYMENT_NAME: my-app
+      IMAGE_NAME: my-docker-repo/my-image:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Kubernetes
+        run: echo "${KUBE_CONFIG}" > $HOME/.kube/config
+
+      - name: Install kubectl
+        uses: actions-hub/kubectl@v1
+
+      - name: Update Kubernetes deployment
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} ${DEPLOYMENT_NAME}=${IMAGE_NAME} -n ${NAMESPACE}
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} -n ${NAMESPACE}
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+
+    env:
+      KUBE_CONFIG: ${{ secrets.KUBECONFIG_PROD }}
+      NAMESPACE: prod
+      DEPLOYMENT_NAME: my-app
+      IMAGE_NAME: my-docker-repo/my-image:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Kubernetes
+        run: echo "${KUBE_CONFIG}" > $HOME/.kube/config
+
+      - name: Install kubectl
+        uses: actions-hub/kubectl@v1
+
+      - name: Update Kubernetes deployment
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} ${DEPLOYMENT_NAME}=${IMAGE_NAME} -n ${NAMESPACE}
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} -n ${NAMESPACE}
